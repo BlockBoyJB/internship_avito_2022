@@ -1,0 +1,93 @@
+version: "3.8"
+
+services:
+  api:
+    container_name: api
+    build: .
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_started
+    restart: always
+    env_file:
+      - docker.env
+    volumes:
+      - ./logs:/logs
+      - ./${JWT_PRIVATE_KEY}:/private.key
+      - ./${JWT_PUBLIC_KEY}:/public.key
+    networks:
+      - api_network
+
+  postgres:
+    container_name: api_postgres
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d ${PG_DB} -U ${PG_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - docker.env
+    networks:
+      - api_network
+
+  redis:
+    container_name: api_redis
+    image: redis:latest
+    restart: always
+    networks:
+      - api_network
+
+  zookeeper:
+    container_name: api_zookeeper
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - api_network
+
+  kafka:
+    container_name: api_kafka
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      zookeeper:
+        condition: service_started
+#    ports:
+#      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+    networks:
+      - api_network
+
+  kafka-ui:
+    container_name: api_kafka_ui
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - kafka
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - api_network
+
+networks:
+  api_network:
+    driver: bridge

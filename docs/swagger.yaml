@@ -1,0 +1,442 @@
+basePath: /
+definitions:
+  avito_intership_internal_service.HistoryOutput:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      operation_id:
+        type: integer
+      order_id:
+        type: integer
+      product_id:
+        type: integer
+      type:
+        type: string
+    type: object
+  echo.HTTPError:
+    properties:
+      message: {}
+    type: object
+  internal_api_v1.accountCreateInput:
+    properties:
+      user_id:
+        type: integer
+    required:
+    - user_id
+    type: object
+  internal_api_v1.accountDepositInput:
+    properties:
+      amount:
+        type: number
+      user_id:
+        type: integer
+    required:
+    - amount
+    - user_id
+    type: object
+  internal_api_v1.accountTransferInput:
+    properties:
+      amount:
+        type: number
+      from:
+        type: integer
+      to:
+        type: integer
+    required:
+    - amount
+    - from
+    - to
+    type: object
+  internal_api_v1.accountWithdrawInput:
+    properties:
+      amount:
+        type: number
+      user_id:
+        type: integer
+    required:
+    - amount
+    - user_id
+    type: object
+  internal_api_v1.balanceResponse:
+    properties:
+      balance:
+        type: number
+    type: object
+  internal_api_v1.operationHistoryInput:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - user_id
+    type: object
+  internal_api_v1.operationReportInput:
+    properties:
+      month:
+        type: integer
+      year:
+        type: integer
+    required:
+    - month
+    - year
+    type: object
+  internal_api_v1.reservationCancelInput:
+    properties:
+      reservation_id:
+        type: integer
+    type: object
+  internal_api_v1.reservationCreateInput:
+    properties:
+      amount:
+        type: number
+      order_id:
+        type: integer
+      product_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - amount
+    - order_id
+    - product_id
+    - user_id
+    type: object
+  internal_api_v1.reservationResponse:
+    properties:
+      reservation_id:
+        type: integer
+    type: object
+  internal_api_v1.reservationRevenueInput:
+    properties:
+      reservation_id:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Api for balance management. Include operations, e.g. deposit, withdraw,
+    transfer, reservation, etc
+  title: Api for account balance management
+  version: "1.0"
+paths:
+  /api/v1/accounts/balance:
+    get:
+      consumes:
+      - application/json
+      description: Get balance for account by id
+      parameters:
+      - description: user id
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api_v1.balanceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - JWT: []
+      summary: Get balance
+      tags:
+      - account
+  /api/v1/accounts/create:
+    post:
+      consumes:
+      - application/json
+      description: Create account
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_v1.accountCreateInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - JWT: []
+      summary: Create account
+      tags:
+      - account
+  /api/v1/accounts/deposit:
+    patch:
+      consumes:
+      - application/json
+      description: Deposit on account
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_v1.accountDepositInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - JWT: []
+      summary: Account deposit
+      tags:
+      - account
+  /api/v1/accounts/transfer:
+    post:
+      consumes:
+      - application/json
+      description: Transfer from account to account
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_v1.accountTransferInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - JWT: []
+      summary: Account transfer
+      tags:
+      - account
+  /api/v1/accounts/withdraw:
+    patch:
+      consumes:
+      - application/json
+      description: Withdraw from account
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_v1.accountWithdrawInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - JWT: []
+      summary: Account withdraw
+      tags:
+      - account
+  /api/v1/operations/history:
+    get:
+      consumes:
+      - application/json
+      description: Get account transactions history
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_v1.operationHistoryInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/avito_intership_internal_service.HistoryOutput'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - JWT: []
+      summary: Get history
+      tags:
+      - operation
+  /api/v1/operations/report:
+    get:
+      consumes:
+      - application/json
+      description: Get monthly report, ordered by products ids
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_v1.operationReportInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - JWT: []
+      summary: Get report
+      tags:
+      - operation
+  /api/v1/reservations/cancel:
+    delete:
+      consumes:
+      - application/json
+      description: cancel product amount reservation and return money to account
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_v1.reservationCancelInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - JWT: []
+      summary: cancel reservation
+      tags:
+      - reservation
+  /api/v1/reservations/create:
+    post:
+      consumes:
+      - application/json
+      description: Create product amount reservation
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_v1.reservationCreateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api_v1.reservationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - JWT: []
+      summary: create reservation
+      tags:
+      - reservation
+  /api/v1/reservations/revenue:
+    post:
+      consumes:
+      - application/json
+      description: confirm reservation
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_v1.reservationRevenueInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - JWT: []
+      summary: revenue reservation
+      tags:
+      - reservation
+securityDefinitions:
+  JWT:
+    description: JWT token
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
